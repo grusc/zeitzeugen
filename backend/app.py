@@ -26,7 +26,7 @@ def read_root():
 
 
 @app.post("/detect_intent")
-def detect_intent(intent_request: IntentRequest):
+def detect_intent(intent_request: IntentRequest) -> list[str]:
     return detect_intent_texts(
         AGENT, intent_request.session_id, [intent_request.text], LANGUAGE_CODE
     )
@@ -40,7 +40,7 @@ def run_sample():
     detect_intent_texts(AGENT, session_id, texts, LANGUAGE_CODE)
 
 
-def detect_intent_texts(agent, session_id, texts, language_code):
+def detect_intent_texts(agent, session_id, texts, language_code) -> list[str]:
     """Returns the result of detect intent with texts as inputs.
 
     Using the same `session_id` between requests allows continuation
@@ -56,6 +56,7 @@ def detect_intent_texts(agent, session_id, texts, language_code):
         client_options = {"api_endpoint": api_endpoint}
     session_client = SessionsClient(client_options=client_options)
 
+    response_messages = []
     for text in texts:
         text_input = session.TextInput(text=text)
         query_input = session.QueryInput(text=text_input, language_code=language_code)
@@ -70,3 +71,4 @@ def detect_intent_texts(agent, session_id, texts, language_code):
             " ".join(msg.text.text) for msg in response.query_result.response_messages
         ]
         print(f"Response text: {' '.join(response_messages)}\n")
+    return response_messages
