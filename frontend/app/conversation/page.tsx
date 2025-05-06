@@ -58,7 +58,7 @@ export default function ConversationPage() {
         try {
             // Send message to API endpoint
             // In a real implementation, you would replace this with your actual API endpoint
-            const response = await fetch("http://127.0.0.1:8000/detect_intent", {
+            const response = await fetch("http://127.0.0.1:8000/agent", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
