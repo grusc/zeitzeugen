@@ -1,20 +1,20 @@
-from fastapi import FastAPI
-from google.cloud.dialogflowcx_v3.services.agents import AgentsClient
-from google.cloud.dialogflowcx_v3.services.sessions import SessionsClient
-from starlette.middleware.cors import CORSMiddleware
+import os
 import uuid
-from google.cloud.dialogflowcx_v3.types import session
-from pydantic import BaseModel
+from io import BytesIO
 
-from google.adk.agents import LlmAgent, Agent
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.genai import types
 from google.adk.tools import VertexAiSearchTool
-
-
-import os
-
+from google.cloud import texttospeech
+from google.cloud.dialogflowcx_v3.services.agents import AgentsClient
+from google.cloud.dialogflowcx_v3.services.sessions import SessionsClient
+from google.cloud.dialogflowcx_v3.types import session
+from google.genai import types
+from pydantic import BaseModel
+from starlette.middleware.cors import CORSMiddleware
 
 # Replace with your actual Vertex AI Search Datastore ID
 # Format: projects/<PROJECT_ID>/locations/<LOCATION>/collections/default_collection/dataStores/<DATASTORE_ID>
@@ -92,7 +92,7 @@ async def call_vsearch_agent_async(query):
                 print(f"Agent Response: {final_response_text}")
                 # You can inspect event.grounding_metadata for source citations
                 if event.grounding_metadata:
-                    for source in event.grounding_metadata.grounding_chunks:
+                    for source in event.grounding_metadata.grounding_chunks or []:
                         print(f"Source: {source}")
                         print(">>>")
                 return final_response_text
@@ -135,6 +135,46 @@ def detect_intent(intent_request: IntentRequest) -> str | None:
 @app.post("/agent")
 async def agent(intent_request: IntentRequest) -> str | None:
     return await call_vsearch_agent_async(intent_request.text)
+
+
+@app.post("/agent-voice")
+async def agent_voice(intent_request: IntentRequest) -> StreamingResponse:
+    result = await call_vsearch_agent_async(intent_request.text)
+    print(f"Result: {result}")
+
+    # Instantiates a client
+    client = texttospeech.TextToSpeechClient()
+
+    # Set the text input to be synthesized
+    synthesis_input = texttospeech.SynthesisInput(text=result)
+
+    # Build the voice request, select the language code ("en-US") and the ssml
+    # voice gender ("neutral")
+    voice = texttospeech.VoiceSelectionParams(
+        language_code="de-DE",
+        name="de-DE-Chirp3-HD-Leda",
+        ssml_gender=texttospeech.SsmlVoiceGender.FEMALE,
+    )
+
+    # Select the type of audio file you want returned
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    # Perform the text-to-speech request on the text input with the selected
+    # voice parameters and audio file type
+    response = client.synthesize_speech(
+        input=synthesis_input, voice=voice, audio_config=audio_config
+    )
+
+    def file_iter():
+        nonlocal response
+        with BytesIO() as f:
+            f.write(response.audio_content)
+            f.seek(0)
+            yield from f
+
+    return StreamingResponse(file_iter(), media_type="audio/mpeg")
 
 
 def run_sample():

@@ -1,3 +1,4 @@
 fastapi[standard]
 google-cloud-dialogflow-cx
 google-adk
+google-cloud-texttospeech
