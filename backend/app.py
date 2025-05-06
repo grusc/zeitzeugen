@@ -3,6 +3,7 @@ from google.cloud.dialogflowcx_v3.services.agents import AgentsClient
 from google.cloud.dialogflowcx_v3.services.sessions import SessionsClient
 import uuid
 from google.cloud.dialogflowcx_v3.types import session
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -14,9 +15,21 @@ AGENT = f"projects/{PROJECT_ID}/locations/{LOCATION_ID}/agents/{AGENT_ID}"
 LANGUAGE_CODE = "de"
 
 
+class IntentRequest(BaseModel):
+    session_id: str
+    text: str
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+
+@app.post("/detect_intent")
+def detect_intent(intent_request: IntentRequest):
+    return detect_intent_texts(
+        AGENT, intent_request.session_id, [intent_request.text], LANGUAGE_CODE
+    )
 
 
 def run_sample():
