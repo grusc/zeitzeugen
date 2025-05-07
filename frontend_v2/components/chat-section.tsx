@@ -20,7 +20,7 @@ export default function ChatSection() {
                 muted
                 playsInline
               >
-                <source src="/placeholder.svg?key=zxd18" type="video/mp4" />
+                <source src="https://storage.googleapis.com/zeitzeuge-bucket/video/chat_video.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>

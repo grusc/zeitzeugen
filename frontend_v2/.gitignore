@@ -38,3 +38,7 @@ coverage/
 
 # Next.js build
 .next/
+
+# Media files
+public/audio/*
+public/videos/*
