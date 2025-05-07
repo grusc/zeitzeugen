@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Send, Mic, RefreshCw, Star, Volume2, VolumeX } from "lucide-react"
+import { Send, Mic, RefreshCw, Star, Volume2, VolumeX, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -17,6 +17,7 @@ type Message = {
   sender: "user" | "assistant"
   options?: { id: number; text: string }[]
   audio?: AudioMessage
+  rating?: number
 }
 
 export default function ChatInterface() {
@@ -36,6 +37,9 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null)
+  const [currentRating, setCurrentRating] = useState<number | null>(null)
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
+  const [lastRatedMessageId, setLastRatedMessageId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({})
   const [isHeaderVisible, setIsHeaderVisible] = useState(false)
@@ -116,6 +120,10 @@ export default function ChatInterface() {
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
     setIsLoading(true)
+    // Reset rating state for new conversation
+    setCurrentRating(null)
+    setFeedbackSubmitted(false)
+    setLastRatedMessageId(null)
 
     try {
       // Text response request
@@ -194,6 +202,36 @@ export default function ChatInterface() {
     handleSendMessage()
   }
 
+  // Function to handle star rating
+  const handleRating = async (rating: number) => {
+    setCurrentRating(rating)
+
+    // Get the last assistant message to rate
+    const lastAssistantMessage = [...messages].reverse().find((msg) => msg.sender === "assistant")
+
+    if (lastAssistantMessage) {
+      // Update the message with the rating
+      setMessages((prev) => prev.map((msg) => (msg.id === lastAssistantMessage.id ? { ...msg, rating } : msg)))
+
+      setLastRatedMessageId(lastAssistantMessage.id)
+
+      // Here you would typically send the rating to your backend
+      try {
+        // Simulate API call to save feedback
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        console.log(`Feedback submitted: ${rating} stars for message ID ${lastAssistantMessage.id}`)
+        setFeedbackSubmitted(true)
+
+        // Reset feedback status after 3 seconds
+        setTimeout(() => {
+          setFeedbackSubmitted(false)
+        }, 3000)
+      } catch (error) {
+        console.error("Error submitting feedback:", error)
+      }
+    }
+  }
+
   // Recommended questions
   const recommendedQuestions = ["Wieviele Sprachen sprichst du?", "Was sind deine Hobbies?"]
 
@@ -243,17 +281,20 @@ export default function ChatInterface() {
                       onClick={() => {
                         setMessages([
                           {
-                          id: "1",
-                          content:
-                            "Hallo! Ich bin Anneliese und habe meine Erlebnisse in Tagebüchern während der französischen Belagerung festgehalten. Unterhalten wir uns!",
-                          sender: "assistant",
-                          audio: {
-                            src: "https://storage.cloud.google.com/zeitzeuge-bucket/audio/anneliese-intro.mp3",
-                            duration: 8,
-                          },
+                            id: "1",
+                            content:
+                              "Hallo! Ich bin Anneliese und habe meine Erlebnisse in Tagebüchern während der französischen Belagerung festgehalten. Unterhalten wir uns!",
+                            sender: "assistant",
+                            audio: {
+                              src: "/audio/anneliese-intro.mp3",
+                              duration: 8,
+                            },
                           },
                         ])
                         setCurrentlyPlaying(null)
+                        setCurrentRating(null)
+                        setFeedbackSubmitted(false)
+                        setLastRatedMessageId(null)
                       }}
                     >
                       <RefreshCw className="h-4 w-4" />
@@ -381,16 +422,33 @@ export default function ChatInterface() {
         </div>
 
         {/* Rating */}
-        <div className="px-4 py-2 flex justify-center">
-          <div className="flex gap-1">
+        <div className="px-4 py-2 flex justify-center items-center">
+          <div className="flex gap-1 items-center">
             {[1, 2, 3, 4, 5].map((star) => (
-              <Star key={star} className="h-5 w-5 text-white opacity-50 hover:opacity-100 cursor-pointer" />
+              <Star
+                key={star}
+                className={`h-5 w-5 ${
+                  currentRating && star <= currentRating ? "text-yellow-400" : "text-white opacity-50 hover:opacity-100"
+                } cursor-pointer transition-colors`}
+                onClick={() => handleRating(star)}
+                fill={currentRating && star <= currentRating ? "currentColor" : "none"}
+              />
             ))}
+
+            {feedbackSubmitted && (
+              <div className="ml-2 flex items-center text-white text-sm">
+                <CheckCircle className="h-4 w-4 mr-1" />
+                <span>Danke für dein Feedback!</span>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Spacer before chat input */}
+        <div className="h-10"></div>
+
         {/* Chat Input */}
-        <div className="p-4 bg-[#FF7D7D]">
+        <div className="p-4 pt-6 bg-[#FF7D7D] mt-8">
           <div className="relative flex items-center">
             <input
               type="text"
@@ -423,8 +481,11 @@ export default function ChatInterface() {
           </div>
         </div>
 
+        {/* Spacer */}
+        <div className="h-6"></div>
+
         {/* Recommended Questions */}
-        <div className="px-4 pt-1 pb-3 flex flex-wrap gap-2 justify-center">
+        <div className="px-4 pt-3 pb-6 flex flex-wrap gap-2 justify-center mt-4">
           {recommendedQuestions.map((question, index) => (
             <button
               key={index}
