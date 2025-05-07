@@ -27,7 +27,7 @@ export default function ChatInterface() {
         "Hallo! Ich bin Anneliese und habe meine Erlebnisse in Tagebüchern während der französischen Belagerung festgehalten. Unterhalten wir uns!",
       sender: "assistant",
       audio: {
-        src: "/audio/anneliese-intro.mp3",
+        src: "https://storage.cloud.google.com/zeitzeuge-bucket/audio/anneliese-intro.mp3",
         duration: 8,
       },
     },
@@ -118,41 +118,54 @@ export default function ChatInterface() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://127.0.0.1:80/agent", {
+      // Text response request
+      const textResponse = await fetch("http://127.0.0.1:80/agent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: inputValue }),
+        body: JSON.stringify({ session_id: "asdasd", text: inputValue }),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to get response")
+      if (!textResponse.ok) {
+        throw new Error("Failed to get text response")
       }
 
-      const data = await response.json()
+      const textData = await textResponse.json()
 
-      // Add audio to specific responses
-      let audio: AudioMessage | undefined
+      // Voice response request
+      const voiceResponse = await fetch("http://127.0.0.1:80/agent-voice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ session_id: "asdasd", text: inputValue }),
+      })
 
-      if (
-        inputValue.toLowerCase().includes("belagerung") ||
-        inputValue.toLowerCase().includes("französisch") ||
-        inputValue.toLowerCase().includes("erlebnisse") ||
-        inputValue.toLowerCase().includes("tagebuch")
-      ) {
-        audio = {
-          src: "/audio/french-siege.mp3",
-          duration: 10,
-        }
+      if (!voiceResponse.ok) {
+        throw new Error("Failed to get voice response")
+      }
+
+      // Get audio blob from voice response
+      const audioBlob = await voiceResponse.blob()
+      const audioUrl = URL.createObjectURL(audioBlob)
+      
+      // Calculate audio duration (approximate)
+      let audioDuration = 10 // Default duration in seconds
+      if (audioBlob.size > 0) {
+        // Rough estimation: ~10KB per second for MP3 at normal quality
+        audioDuration = Math.ceil(audioBlob.size / 10000)
       }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.text,
+        content: textData,
         sender: "assistant",
-        options: data.options,
-        audio,
+        options: textData.options,
+        audio: {
+          src: audioUrl,
+          duration: audioDuration,
+        },
       }
 
       setMessages((prev) => [...prev, assistantMessage])
@@ -230,14 +243,14 @@ export default function ChatInterface() {
                       onClick={() => {
                         setMessages([
                           {
-                            id: "1",
-                            content:
-                              "Hallo! Ich bin Anneliese und habe meine Erlebnisse in Tagebüchern während der französischen Belagerung festgehalten. Unterhalten wir uns!",
-                            sender: "assistant",
-                            audio: {
-                              src: "/audio/anneliese-intro.mp3",
-                              duration: 8,
-                            },
+                          id: "1",
+                          content:
+                            "Hallo! Ich bin Anneliese und habe meine Erlebnisse in Tagebüchern während der französischen Belagerung festgehalten. Unterhalten wir uns!",
+                          sender: "assistant",
+                          audio: {
+                            src: "https://storage.cloud.google.com/zeitzeuge-bucket/audio/anneliese-intro.mp3",
+                            duration: 8,
+                          },
                           },
                         ])
                         setCurrentlyPlaying(null)
