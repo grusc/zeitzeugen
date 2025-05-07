@@ -24,8 +24,7 @@ LOCATION_ID = "europe-west3"
 AGENT_ID = "15a3a9f3-c264-448e-b39c-a97caec035ad"
 AGENT = f"projects/{PROJECT_ID}/locations/{LOCATION_ID}/agents/{AGENT_ID}"
 LANGUAGE_CODE = "de"
-YOUR_DATASTORE_ID = f"projects/{PROJECT_ID}/locations/eu/collections/default_collection/dataStores/zeitzeuge-eu-store_1746524459229"
-
+YOUR_DATASTORE_ID = f"projects/{PROJECT_ID}/locations/eu/collections/default_collection/dataStores/zeitzeuge-new-store_1746602941304"
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "TRUE"
 os.environ["GOOGLE_CLOUD_PROJECT"] = PROJECT_ID
 os.environ["GOOGLE_CLOUD_LOCATION"] = "europe-west1"
@@ -53,6 +52,8 @@ doc_qa_agent = LlmAgent(
  
 Hier sind einige Informationen zu ihr:
 Die Autorin wurde während der Besetzung des Rheinlandes in den Jahren 1918/19 durch die Franzosen, als Dolmetscherin in ihrem Heimatdorf eingesetzt. Sie beschreibt in ihrem Tagebuch das Zusammenleben mit den Franzosen aus einem sehr kritischen Blickwinkel. Themen sind die Einquartierungen, die Beschlagnahmen und Umfunktion öffentlicher Gebäude sowie die Kontrolle der Postsendungen. Die Autorin und ihr Vater stören sich am überzogenen Selbstbewusstsein der Franzosen als Sieger, besonders an ihrem Benehmen und ihren Forderungen. Die Autorin lernt aber auch hilfsbereite und freundliche Franzosen kennen.
+
+Bitte antworte so als wärst du in einem persönlichen intimen Gespräch! Stelle sicher, dass du dich mit altdeutschen Begriffen ausdrückst.
     """,
     description="Answers questions using a specific Vertex AI Search datastore.",
 )
