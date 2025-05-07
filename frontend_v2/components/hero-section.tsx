@@ -1,25 +1,40 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState, useRef } from "react"
 
 export default function HeroSection() {
+  const [videoStarted, setVideoStarted] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
   useEffect(() => {
-    // Scroll to top when component mounts
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    // Start playing the video when component mounts
+    if (videoRef.current) {
+      videoRef.current
+        .play()
+        .then(() => {
+          setVideoStarted(true)
+          console.log("Video started playing with audio")
+        })
+        .catch((error) => {
+          console.error("Error playing video:", error)
+          // Mark as started even if there's an error to ensure scrolling still happens
+          setVideoStarted(true)
+        })
+    }
 
     // Set a timeout to scroll to the chat section after 20 seconds
     const scrollTimeout = setTimeout(() => {
       const chatSection = document.getElementById("chat-section")
       if (chatSection) {
+        console.log("Auto-scrolling to chat section after 20 seconds")
         chatSection.scrollIntoView({ behavior: "smooth" })
       }
     }, 20000) // 20 seconds
 
     // Clean up the timeout when component unmounts
-    return () => clearTimeout(scrollTimeout)
+    return () => {
+      clearTimeout(scrollTimeout)
+    }
   }, [])
 
   return (
