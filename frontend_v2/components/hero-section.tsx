@@ -4,6 +4,12 @@ import { useEffect } from "react"
 
 export default function HeroSection() {
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
     // Set a timeout to scroll to the chat section after 20 seconds
     const scrollTimeout = setTimeout(() => {
       const chatSection = document.getElementById("chat-section")
@@ -27,7 +33,7 @@ export default function HeroSection() {
           playsInline
           className="absolute w-full h-full object-cover"
         >
-          <source src="/videos/your-background-video.mp4" type="video/mp4" />
+          <source src="https://storage.googleapis.com/zeitzeuge-bucket/video/background.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         {/* Optional overlay to adjust video brightness/contrast */}
