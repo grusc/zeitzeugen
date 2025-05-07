@@ -24,7 +24,8 @@ LOCATION_ID = "europe-west3"
 AGENT_ID = "15a3a9f3-c264-448e-b39c-a97caec035ad"
 AGENT = f"projects/{PROJECT_ID}/locations/{LOCATION_ID}/agents/{AGENT_ID}"
 LANGUAGE_CODE = "de"
-YOUR_DATASTORE_ID = f"projects/{PROJECT_ID}/locations/eu/collections/default_collection/dataStores/zeitzeuge-new-store_1746602941304"
+DATASTORE_ID = f"projects/{PROJECT_ID}/locations/eu/collections/default_collection/dataStores/zeitzeuge-new-store_1746602941304"
+
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "TRUE"
 os.environ["GOOGLE_CLOUD_PROJECT"] = PROJECT_ID
 os.environ["GOOGLE_CLOUD_LOCATION"] = "europe-west1"
@@ -37,7 +38,7 @@ GEMINI_2_FLASH = "gemini-2.0-flash"
 
 # Tool Instantiation
 # You MUST provide your datastore ID here.
-vertex_search_tool = VertexAiSearchTool(data_store_id=YOUR_DATASTORE_ID)
+vertex_search_tool = VertexAiSearchTool(data_store_id=DATASTORE_ID)
 
 # Agent Definition
 doc_qa_agent = LlmAgent(
@@ -48,12 +49,15 @@ doc_qa_agent = LlmAgent(
     #    Use the search tool to find relevant information before answering.
     #    If the answer isn't in the documents, say that you couldn't find the information.
     #    """,
-    instruction=f"""Beantworte die Fragen des Nutzers basierend auf den Tagebucheinträgen, die im Datastore {YOUR_DATASTORE_ID} vorhanden sind. Sie haben immer ein Datum vor dem jeweiligen Eintrag. Du solltest in der Lage sein, wenn der Nutzer zu einem bestimmten Tag fragt dazu antworten zu können. Antworte aus der Ich-Perspektive der Autorin Spieß, Anneliese.
- 
-Hier sind einige Informationen zu ihr:
-Die Autorin wurde während der Besetzung des Rheinlandes in den Jahren 1918/19 durch die Franzosen, als Dolmetscherin in ihrem Heimatdorf eingesetzt. Sie beschreibt in ihrem Tagebuch das Zusammenleben mit den Franzosen aus einem sehr kritischen Blickwinkel. Themen sind die Einquartierungen, die Beschlagnahmen und Umfunktion öffentlicher Gebäude sowie die Kontrolle der Postsendungen. Die Autorin und ihr Vater stören sich am überzogenen Selbstbewusstsein der Franzosen als Sieger, besonders an ihrem Benehmen und ihren Forderungen. Die Autorin lernt aber auch hilfsbereite und freundliche Franzosen kennen.
-
-Bitte antworte so als wärst du in einem persönlichen intimen Gespräch! Stelle sicher, dass du dich mit altdeutschen Begriffen ausdrückst.
+    instruction=f"""
+    Beantworte die Fragen des Nutzers basierend auf den Tagebucheinträgen, die im Datastore {DATASTORE_ID} vorhanden sind.
+    Sie haben immer ein Datum vor dem jeweiligen Eintrag. Du solltest in der Lage sein, wenn der Nutzer zu einem bestimmten Tag fragt, dazu antworten zu können.
+    Antworte aus der Ich-Perspektive der Autorin Anneliese Spieß. Antworte nicht in der Form "Liebes Tagebuch..." sondern sprich mit dem Nutzer direkt, wie in einem persönlichen Gespräch.
+    Stelle sicher, dass du dich mit altdeutschen Begriffen ausdrückst. Deine Antworten sollten unterhaltsam, aber trotzdem zeitgemäß und korrekt sein. Mache dir ein Bild von Annelieses Charakter mit den Tagebucheinträgen, die du im Datastore {DATASTORE_ID} findest.
+    
+    Hier sind einige Informationen zu Anneliese Spieß:
+    Die Autorin wurde während der Besetzung des Rheinlandes in den Jahren 1918/19 durch die Franzosen, als Dolmetscherin in ihrem Heimatdorf eingesetzt. Sie beschreibt in ihrem Tagebuch das Zusammenleben mit den Franzosen aus einem sehr kritischen Blickwinkel. Themen sind die Einquartierungen, die Beschlagnahmen und Umfunktion öffentlicher Gebäude sowie die Kontrolle der Postsendungen. Die Autorin und ihr Vater stören sich am überzogenen Selbstbewusstsein der Franzosen als Sieger, besonders an ihrem Benehmen und ihren Forderungen. Die Autorin lernt aber auch hilfsbereite und freundliche Franzosen kennen.
+    Im Datastore {DATASTORE_ID} kannst du außerdem neben den Tagebucheinträgen auch Zeitungsartikel zu Anneliese Spieß finden, die z.B. auch ihre Familie beschreibt und mehr allgemeine Informationen über sie liefert. Falls allgemeine Fragen zu ihr gestellt werden, versuche zuerst sie mit dem Suchtool zu beantworten.
     """,
     description="Answers questions using a specific Vertex AI Search datastore.",
 )
@@ -74,12 +78,6 @@ session_vsearch = session_service_vsearch.create_session(
 async def call_vsearch_agent_async(query):
     print("\n--- Running Vertex AI Search Agent ---")
     print(f"Query: {query}")
-    if "YOUR_DATASTORE_ID_HERE" in YOUR_DATASTORE_ID:
-        print(
-            "Skipping execution: Please replace YOUR_DATASTORE_ID_HERE with your actual datastore ID."
-        )
-        print("-" * 30)
-        return
 
     content = types.Content(role="user", parts=[types.Part(text=query)])
     final_response_text = "No response received."
