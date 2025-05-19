@@ -58,7 +58,7 @@ export default function ChatSection() {
                 playsInline
                 // Remove autoPlay as we'll control this with the observer
               >
-                <source src="https://storage.googleapis.com/zeitzeuge-bucket/video/chat_video.mp4" type="video/mp4" />
+                <source src="https://storage.googleapis.com/temp_hackathon_zeitzeuge/video/chat_video.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>

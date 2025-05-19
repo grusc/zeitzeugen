@@ -127,7 +127,7 @@ export default function ChatInterface() {
 
     try {
       // Text response request
-      const textResponse = await fetch("http://127.0.0.1:80/agent", {
+      const textResponse = await fetch("http://127.0.0.1:8000/agent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -142,7 +142,7 @@ export default function ChatInterface() {
       const textData = await textResponse.json()
 
       // Voice response request
-      const voiceResponse = await fetch("http://127.0.0.1:80/agent-voice", {
+      const voiceResponse = await fetch("http://127.0.0.1:8000/agent-voice", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

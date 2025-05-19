@@ -19,12 +19,12 @@ from starlette.middleware.cors import CORSMiddleware
 # Replace with your actual Vertex AI Search Datastore ID
 # Format: projects/<PROJECT_ID>/locations/<LOCATION>/collections/default_collection/dataStores/<DATASTORE_ID>
 # e.g., "projects/12345/locations/us-central1/collections/default_collection/dataStores/my-datastore-123"
-PROJECT_ID = "ai-media25mun-309"
+PROJECT_ID = "sep-analytics-sandbox"
 LOCATION_ID = "europe-west3"
 AGENT_ID = "15a3a9f3-c264-448e-b39c-a97caec035ad"
 AGENT = f"projects/{PROJECT_ID}/locations/{LOCATION_ID}/agents/{AGENT_ID}"
 LANGUAGE_CODE = "de"
-DATASTORE_ID = f"projects/{PROJECT_ID}/locations/eu/collections/default_collection/dataStores/zeitzeuge-new-store_1746602941304"
+DATASTORE_ID = f"projects/{PROJECT_ID}/locations/eu/collections/default_collection/dataStores/hackathon-zeitzeuge-store_1747056261578"
 
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "TRUE"
 os.environ["GOOGLE_CLOUD_PROJECT"] = PROJECT_ID

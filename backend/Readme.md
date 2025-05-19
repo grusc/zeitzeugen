@@ -29,7 +29,7 @@ This is the backend service for the Zeitzeugen project, built with FastAPI, Goog
 pip install -r requirements.txt
 ```
 
-2. Set up Google Cloud credentials:
+2. Set up Google Cloud credentials (Uses Pub Sandbox Project):
 
 ```
 gcloud auth application-default login
@@ -45,11 +45,11 @@ docker build -t zeitzeugen-fastapi:latest .
 
 2. Run the application:
 ```
-docker run -p 80:42069 -e GOOGLE_APPLICATION_CREDENTIALS="/app/.config/gcloud/application_default_credentials.json" --mount type=bind,source=${HOME}/.config/gcloud,target=/app/.config/gcloud zeitzeugen-fastapi:latest
+docker run -p 8000:42069 -e GOOGLE_APPLICATION_CREDENTIALS="/app/.config/gcloud/application_default_credentials.json" --mount type=bind,source=${HOME}/.config/gcloud,target=/app/.config/gcloud zeitzeugen-fastapi:latest
 ```
 
 This command:
-- Maps host port 80 to container port 42069
+- Maps host port 8000 to container port 42069
 - Sets the environment variable for Google credentials
 - Mounts your local Google credentials to the container
 - Uses the zeitzeugen-fastapi image

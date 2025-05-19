@@ -48,7 +48,7 @@ export default function HeroSection() {
           playsInline
           className="absolute w-full h-full object-cover"
         >
-          <source src="https://storage.googleapis.com/zeitzeuge-bucket/video/background.mp4" type="video/mp4" />
+          <source src="https://storage.googleapis.com/temp_hackathon_zeitzeuge/video/background.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         {/* Optional overlay to adjust video brightness/contrast */}
